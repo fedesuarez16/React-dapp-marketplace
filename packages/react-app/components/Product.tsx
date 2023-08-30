@@ -95,7 +95,7 @@ const Product = ({ id, setError, setLoading, clear }: any) => {
     toast.success(
       <PurchaseReceiptToast 
       productName={product?.name}
-      productPrice={product?.price}
+      productPrice={productPriceFromWei}
       ProductSeller={product?.owner}
         transactionHash={res.hash} 
       />, {
