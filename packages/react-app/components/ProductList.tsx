@@ -24,6 +24,7 @@ const ProductList = () => {
     const [loading, setLoading] = useState("");  
       // Use the useProductsLength hook to get the length of products
     const { productsLength, isLoading: productsLengthLoading } = useProductsLength();
+    
 
     // Define a function to clear the error, success and loading states
     const clear = () => {
@@ -72,11 +73,11 @@ const ProductList = () => {
         <h2 className="sr-only">Products</h2>
           <div className="mb-4 text-center border border-gray-400 rounded p-4">
             <p className="text-lg text-gray-600">
-              {productsLengthLoading ? (
-                <span>Loading products...</span>
-              ) : (
-                <span>Total products: {productsLength} </span>
-              )}
+            {productsLengthLoading ? (
+            <span>Loading products...</span>
+                ) : (
+                  <span>Total products: {productsLength} </span>
+               )}
           </p>
       </div>
 
