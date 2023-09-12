@@ -1,5 +1,4 @@
 import React from 'react';
-
 // Importing Address from 'viem' (this seems to be unused in the provided code, so you might want to check if it's needed)
 import { Address } from 'viem';
 

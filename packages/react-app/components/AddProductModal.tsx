@@ -39,6 +39,41 @@ const AddProductModal = () => {
 
 
 
+    const validateInput = () => {
+      // Check if the product name is a number or empty
+      if (!debouncedProductName || !isNaN(Number(debouncedProductName))) {
+        toast.error("Product name should be a valid string and not a number.");
+        return false;
+      }
+      
+      // Convert debouncedProductPrice to a number for the comparison
+      const productPriceNumber = Number(debouncedProductPrice);
+      if (!productPriceNumber || productPriceNumber <= 0) {
+        toast.error("Please enter a valid product price.");
+        return false;
+      }
+      
+      if (!debouncedProductImage) {
+        toast.error("Please enter a product image URL.");
+        return false;
+      }
+    
+      // Check if the product description is just a number or empty
+      if (!debouncedProductDescription || !isNaN(Number(debouncedProductDescription))) {
+        toast.error("Product description should contain meaningful content and not just a number.");
+        return false;
+      }
+    
+      if (!debouncedProductLocation) {
+        toast.error("Please enter a product location.");
+        return false;
+      }
+    
+      return true;
+    };
+    ;
+    
+
     // Check if all the input fields are filled
   const isComplete =
   productName &&
@@ -61,6 +96,9 @@ const clearForm = () => {
     `${debouncedProductPrice.toString() || 0}`
   );
 
+
+
+
 // Use the useContractSend hook to use our writeProduct function on the marketplace contract and add a product to the marketplace
 const { writeAsync: createProduct } = useContractSend("writeProduct", [
     debouncedProductName,
@@ -75,8 +113,7 @@ const { writeAsync: createProduct } = useContractSend("writeProduct", [
     if (!createProduct) {
       throw "Failed to create product";
     }
-    setLoading("Creating...");
-    if (!isComplete) throw new Error("Please fill all fields");
+   
     // Create the product by calling the writeProduct function on the marketplace contract
     const purchaseTx = await createProduct();
     setLoading("Waiting for confirmation...");
@@ -84,20 +121,22 @@ const { writeAsync: createProduct } = useContractSend("writeProduct", [
     await purchaseTx.wait();
     // Close the modal and clear the input fields after the product is added to the marketplace
     setVisible(false);
-    clearForm();
-
-    
+    clearForm();    
   };
 
   // Define function that handles the creation of a product, if a user submits the product form
   const addProduct = async (e: any) => {
     e.preventDefault();
     try {
+      if (!validateInput()) {
+        return;
+      }
       // Display a notification while the product is being added to the marketplace
       await toast.promise(handleCreateProduct(), {
         pending: "Creating product...",
         success: "Product created successfully",
         error: "Something went wrong. Try again.",
+        
       });
       // Display an error message if something goes wrong
     } catch (e: any) {
@@ -110,21 +149,21 @@ const { writeAsync: createProduct } = useContractSend("writeProduct", [
   };
 
 
-   // Get the user's address and balance
-   const { address, isConnected } = useAccount();
-   const { data: cusdBalance } = useBalance({
-     address,
-     token: erc20Instance.address as `0x${string}`,
-   });
+  //  // Get the user's address and balance
+    const { address, isConnected } = useAccount();
+    const { data: cusdBalance, refetch: refetchBalance } = useBalance({
+      address,
+      token: erc20Instance.address as `0x${string}`,
+    });
  
    // If the user is connected and has a balance, display the balance
-   useEffect(() => {
-     if (isConnected && cusdBalance) {
-       setDisplayBalance(true);
-       return;
-     }
-     setDisplayBalance(false);
-   }, [cusdBalance, isConnected]);
+    useEffect(() => {
+      if (isConnected && cusdBalance) {
+        setDisplayBalance(true);
+        return;
+      }
+      setDisplayBalance(false);
+    }, [cusdBalance, isConnected]);
 
 
    // Define the JSX that will be rendered
@@ -240,8 +279,10 @@ const { writeAsync: createProduct } = useContractSend("writeProduct", [
         )}
       </div>
 
+    
+
       {/* Display the user's cUSD balance */}
-      {displayBalance && (
+       {displayBalance && (
         <span
           className="inline-block text-dark ml-4 px-6 py-2.5 font-medium text-md leading-tight rounded-2xl shadow-none "
           data-bs-toggle="modal"
@@ -249,7 +290,7 @@ const { writeAsync: createProduct } = useContractSend("writeProduct", [
         >
           Balance: {Number(cusdBalance?.formatted || 0).toFixed(2)} cUSD
         </span>
-      )}
+      )} 
     </div>
   );
 };

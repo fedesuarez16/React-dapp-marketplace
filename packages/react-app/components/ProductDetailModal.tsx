@@ -2,6 +2,8 @@ import React from 'react';
 import { useState } from 'react';
 import { Product } from './Product';
 import { ethers } from 'ethers';
+import { toast } from "react-toastify";
+
 
 // Define the props interface for the component
 interface ModalProps {
@@ -39,12 +41,15 @@ const ProductDetailModal = ({ product, onClose, handlePurchase }: ModalProps) =>
 
               {/* Purchase button */}
               <button
-                onClick={handlePurchase}
+                onClick={() => toast.promise(handlePurchase(), {
+                  pending: "Purchasing product...",
+                  success: "Product purchased successfully",
+                  error: "Failed to purchase product",
+                })}
                 className="mt-4 h-14 w-full border-[1px] border-gray-500 text-black p-2 rounded-lg hover:bg-black hover:text-white"
               >
                 Buy for {ethers.utils.formatEther(product.price.toString())} cUSD
               </button>
-
               {/* Close button */}
               <div className="mt-6">
                 <button

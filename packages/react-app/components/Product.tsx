@@ -83,33 +83,40 @@ const Product = ({ id, setError, setLoading, clear }: any) => {
     const approveTx = await approve();
     // Wait for the transaction to be mined, (1) is the number of confirmations we want to wait for
     await approveTx.wait(1);
-    setLoading("Purchasing...");
+    setLoading();
     // Once the transaction is mined, purchase the product via our marketplace contract buyProduct function
     const res = await purchase();
     // Wait for the transaction to be mined
-    await res.wait();
-    setPurchased(true); // Set purchased state to true after successful purchase
+    const receipt = await res.wait();
+    
+    if (receipt.status === 1) { // Checking the status of the receipt to decide what to do
+        setPurchased(true); // Set purchased state to true after successful purchase
+        setTransactionHash(res.hash); // Set the transaction hash after successful purchase
+        toast.success(
+            <PurchaseReceiptToast 
+                productName={product?.name}
+                productPrice={productPriceFromWei}
+                ProductSeller={product?.owner}
+                transactionHash={res.hash} 
+            />, 
+            {
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeButton: true,
+                progressClassName: 'toast-progress-bar-success',
+            }
+        );
 
-    setTransactionHash(res.hash); // Set the transaction hash after successful purchase
-
-    toast.success(
-      <PurchaseReceiptToast 
-      productName={product?.name}
-      productPrice={productPriceFromWei}
-      ProductSeller={product?.owner}
-        transactionHash={res.hash} 
-      />, {
-        position: toast.POSITION.TOP_CENTER,
-        autoClose: 5000, // Close the notification after 5 seconds
-        hideProgressBar: true,
-        closeButton: true,
-        progressClassName: 'toast-progress-bar-success',
-      });   
-  };
+    } else {
+        // Handle the failed transaction scenario
+        throw new Error("Transaction failed");
+    }
+};
 
   // Define the purchaseProduct function that is called when the user clicks the purchase button
   const purchaseProduct = async () => {
-    setLoading("Approving ...");
+    setLoading();
     clear();
 
     try {
@@ -128,10 +135,11 @@ const Product = ({ id, setError, setLoading, clear }: any) => {
       // If there is an error, display the error message
     } catch (e: any) {
       console.log({ e });
-      setError(e?.reason || e?.message || "Something went wrong. Try again.");
+      // setError(e?.reason || e?.message || "Something went wrong. Try again.");
       // Once the purchase is complete, clear the loading state
     } finally {
       setLoading(null);
+      clear();
     }
   };
 

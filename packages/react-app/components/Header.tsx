@@ -4,6 +4,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 
 export default function Header() {
+ 
     return (
       <Disclosure as="nav" className="bg-prosperity border-b border-black">
         {({ open }) => (
@@ -38,6 +39,7 @@ export default function Header() {
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                 <ConnectButton showBalance={{smallScreen: true, largeScreen: false}} />
                 </div>
+              
               </div>
             </div>
   

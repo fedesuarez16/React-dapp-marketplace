@@ -38,6 +38,8 @@ import Layout from "../components/Layout";
 // Import the ToastContainer component from react-toastify to display notifications.
 import {ToastContainer} from "react-toastify";
 
+
+
 // Configure the information for the chains we want to connect to through RainbowKit.
 const { chains, provider } = configureChains(
   [Alfajores, Celo],
