@@ -1,6 +1,6 @@
 # React Dapp Marketplace
 
-This is a decentralized marketplace built using React and Ethereum smart contracts. It allows users to buy and sell items using cryptocurrency.
+This is a decentralized marketplace working in the alfajores celo testnet, built using React and  smart contracts. It allows users to buy and sell items using cryptocurrency.
 
 ## Features
 
