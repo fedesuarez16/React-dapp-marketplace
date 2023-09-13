@@ -63,8 +63,11 @@ contract Marketplace {
         uint256 sold;
     }
 
-    // Mapping of products to their index
-    mapping(uint256 => Product) internal products;
+    // Define a mapping to store products with known keys (product IDs)
+    mapping(uint256 => Product) public products;
+
+    // Counter for generating unique product IDs
+    uint256 public productIdCounter = 0;
 
     // Writes a new product to the marketplace
     function writeProduct(
@@ -74,21 +77,19 @@ contract Marketplace {
         string memory _location,
         uint256 _price
     ) public {
-        // Number of times the product has been sold is initially 0 because it has not been sold yet
-        uint256 _sold = 0;
-        // Adds a new Product struct to the products mapping
-        products[productsLength] = Product(
-            // Sender's address is set as the owner
+        // Generate a unique product ID
+        uint256 productId = productIdCounter++;
+
+        // Create and store the product
+        products[productId] = Product(
             payable(msg.sender),
             _name,
             _image,
             _description,
             _location,
             _price,
-            _sold
+            0
         );
-        // Increases the number of products in the marketplace by 1
-        productsLength++;
     }
 
     // Reads a product from the marketplace
@@ -121,39 +122,48 @@ contract Marketplace {
         );
     }
 
-    // Buys a product from the marketplace
-    function buyProduct(
-        // Index of the product
-        uint256 _index
-    ) public payable {
-        // Transfers the tokens from the buyer to the seller
+    function buyProduct(uint256 _index) public {
+        // Ensure that the product index is valid
+        require(_index < productsLength, "Invalid product index.");
+
+        // Get the product being purchased
+        Product storage product = products[_index];
+
+        // Ensure that the buyer has enough tokens
+        require(
+            IERC20Token(cUsdTokenAddress).balanceOf(msg.sender) >=
+                product.price,
+            "Insufficient tokens to purchase the product."
+        );
+
+        // Transfer the tokens from the buyer to the seller
         require(
             IERC20Token(cUsdTokenAddress).transferFrom(
-                // Sender's address is the buyer
                 msg.sender,
-                // Receiver's address is the seller
-                products[_index].owner,
-                // Amount of tokens to transfer is the price of the product
-                products[_index].price
+                product.owner,
+                product.price
             ),
-            // If transfer fails, throw an error message
             "Transfer failed."
         );
-        // Increases the number of times the product has been sold
-        products[_index].sold++;
+
+        // Increase the number of times the product has been sold
+        product.sold++;
     }
 
     // Returns the number of products in the marketplace
     function getProductsLength() public view returns (uint256) {
         return (productsLength);
     }
-     // Mapping to track favorite products for each user
+
+    // Mapping to track favorite products for each user
     mapping(address => mapping(uint256 => bool)) private favoriteProducts;
 
     // Function to toggle the favorite status of a product
     function toggleFavorite(uint256 productId) public {
         require(productId < productsLength, "Invalid product ID.");
-        favoriteProducts[msg.sender][productId] = !favoriteProducts[msg.sender][productId];
+        favoriteProducts[msg.sender][productId] = !favoriteProducts[msg.sender][
+            productId
+        ];
     }
 
     // Function to check if a product is a favorite
