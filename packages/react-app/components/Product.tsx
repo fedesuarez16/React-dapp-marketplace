@@ -1,3 +1,4 @@
+'use client'
 /* eslint-disable @next/next/no-img-element */
 // This component displays and enables the purchase of a product
 
